@@ -1,40 +1,37 @@
 /* ============================================================
    GET UP & MOVE / Método GENX — sistema de diseño
-   Paleta acordada con Karla: fondo negro, verde bosque
-   (protagonista), verde más claro, borgoña #7B3347
-   (concentrado en el CTA principal), beige/hueso.
-   Isotipo: kettlebell + "KD" en negativo (versión clara sobre
-   este fondo oscuro). Tipografía sin cambios: Fredoka
-   (display/rótulos) + Yellowtail (guiños manuscritos) + Karla
-   (texto de lectura).
+   Paleta leída de la identidad real: beige cálido, chocolate,
+   oliva y vino. Isotipo: kettlebell + "KD" en negativo.
+   Tipografía: Fredoka (display/rótulos) + Yellowtail (guiños
+   manuscritos) + Karla (texto de lectura)
    ============================================================ */
 
 :root{
-  color-scheme: dark;
+  color-scheme: light;
 
   /* superficies */
-  --stone: #14170F;
-  --stone-deep: #23331E;
-  --stone-line: #3C4A34;
+  --stone: #F0E7D8;
+  --stone-deep: #E6D8BF;
+  --stone-line: #D6C4A0;
 
   /* texto */
-  --ink: #EFE6D3;
-  --ink-soft: #C9BFA8;
-  --ink-faint: #8B8570;
+  --ink: #46311F;
+  --ink-soft: #6B543C;
+  --ink-faint: #94805F;
 
   /* acentos */
-  --olive: #9CC08E;
-  --olive-light: #B7D1A8;
-  --olive-wash: #263A22;
-  --wine: #7B3347;
-  --wine-wash: #3A1F27;
+  --olive: #6E7A46;
+  --olive-light: #93A066;
+  --olive-wash: #E3E4C9;
+  --wine: #6B2A2E;
+  --wine-wash: #ECD7D4;
 
   /* isotipo — siempre negro/blanco, sea cual sea el tema */
   --logo-ink: #171310;
   --logo-chalk: #FBF6EC;
 
   /* sobre fondo oscuro/acento */
-  --chalk: #F7F2E6;
+  --chalk: #FBF6EC;
 
   --radius-s: 4px;
   --radius-m: 14px;
@@ -43,15 +40,15 @@
   --step: 8px;
   --measure: 62ch;
 
-  --shadow-soft: 0 1px 2px rgba(0,0,0,.35), 0 12px 28px -18px rgba(0,0,0,.6);
+  --shadow-soft: 0 1px 2px rgba(36,31,28,.06), 0 12px 28px -18px rgba(36,31,28,.35);
 
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Identidad comprometida a un único mundo visual: fondo negro,
-   verde bosque y borgoña, como decidió Karla. Sin variante clara
-   automática a propósito — GENX ya no tiene una versión "modo día". */
+/* Identidad comprometida a un único mundo visual: cálido y claro,
+   como la gráfica real de la marca. Sin variante oscura automática
+   a propósito — GENX no tiene una versión "modo noche". */
 
 *{ box-sizing: border-box; }
 html,body{ margin:0; }
@@ -104,7 +101,7 @@ a{ color: inherit; }
 
 .skip-link{
   position:absolute; left:12px; top:-60px;
-  background:var(--wine); color:var(--chalk);
+  background:var(--ink); color:var(--chalk);
   padding:10px 16px; border-radius: var(--radius-s);
   transition: top .15s ease;
   z-index: 100;
@@ -131,7 +128,7 @@ button, .btn{
   transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
 }
 .btn-primary{
-  background: var(--wine);
+  background: var(--olive);
   color: var(--chalk);
   box-shadow: var(--shadow-soft);
 }
@@ -144,7 +141,7 @@ button, .btn{
 .btn-secondary:hover{ border-color: var(--ink-soft); }
 .btn-on-dark{
   background: var(--chalk);
-  color: var(--stone);
+  color: var(--olive);
 }
 
 /* ---------- header ---------- */
@@ -410,7 +407,7 @@ nav.links a:hover{ opacity:1; }
   border: 1px solid var(--stone-line);
 }
 .benefit.lg{
-  background: var(--stone-deep);
+  background: var(--olive);
   color: var(--chalk);
   border-color: transparent;
 }
@@ -454,14 +451,14 @@ nav.links a:hover{ opacity:1; }
   .testis{ grid-template-columns: repeat(3,1fr); }
 }
 .testi{
-  background: var(--stone);
+  background: var(--stone-deep);
   border-radius: var(--radius-m);
   padding: 26px;
   border: 1px solid var(--stone-line);
 }
 .testi p.quote{
   font-family:"Yellowtail", cursive;
-  font-size:1.5rem; line-height:1.2; color:var(--olive);
+  font-size:1.5rem; line-height:1.2; color:var(--wine);
   margin-bottom:16px;
 }
 .testi .who{ font-size:.85rem; color:var(--ink-faint); font-weight:700; }
@@ -469,7 +466,7 @@ nav.links a:hover{ opacity:1; }
 /* ---------- app teaser / CTA oscuro ---------- */
 .dark-block{
   position:relative; overflow:hidden;
-  background: var(--stone-deep);
+  background: var(--ink);
   color: var(--chalk);
   border-radius: var(--radius-l);
   padding: 48px 32px;
@@ -510,7 +507,7 @@ nav.links a:hover{ opacity:1; }
   font-size:.72rem;
 }
 .phone .screen header{
-  background: var(--stone-deep); color:var(--chalk);
+  background: var(--olive); color:var(--chalk);
   padding: 14px 14px 20px;
   font-family:"Fredoka", ui-rounded, sans-serif; font-weight:600; font-size:.95rem;
 }
