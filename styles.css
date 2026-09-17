@@ -2,8 +2,9 @@
    GET UP & MOVE / Método GENX — sistema de diseño
    Paleta leída de la identidad real: beige cálido, chocolate,
    oliva y vino. Isotipo: kettlebell + "KD" en negativo.
-   Tipografía: Fredoka (display/rótulos) + Yellowtail (guiños
-   manuscritos) + Karla (texto de lectura)
+   Tipografía: Fredoka (títulos, rótulos y todo el acento
+   editorial) + Karla (texto de lectura) — una sola familia de
+   display en todo el sitio, sin cursiva manuscrita.
    ============================================================ */
 
 :root{
@@ -80,9 +81,9 @@ h1,h2,h3,h4{
   color: var(--ink);
 }
 em, .accent-script{
-  font-family: "Yellowtail", "Segoe Script", cursive;
+  font-family: "Fredoka", ui-rounded, "Karla", sans-serif;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 p{ margin:0; }
@@ -306,9 +307,9 @@ nav.links a:hover{ opacity:1; }
   .split.reverse .split-media{ order:2; }
 }
 .pull{
-  font-family:"Yellowtail", "Segoe Script", cursive;
-  font-weight: 400;
-  font-size: clamp(1.9rem, 4.6vw, 3rem);
+  font-family:"Fredoka", ui-rounded, "Karla", sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3.6vw, 2.4rem);
   line-height:1.25;
   color: var(--wine);
 }
@@ -330,6 +331,38 @@ nav.links a:hover{ opacity:1; }
   margin-top:18px;
   display:flex; flex-direction:column; gap:14px;
   color: var(--ink-soft);
+}
+
+/* ---------- antes / ahora ---------- */
+.before-after{
+  display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center;
+  gap: 28px;
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid var(--stone-line);
+}
+.ba-col{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+.ba-group{ display:flex; gap:8px; }
+.ba-card{
+  margin:0; width: 118px; aspect-ratio: 3/4;
+  border-radius: var(--radius-s);
+  overflow:hidden;
+  border: 1px solid var(--stone-line);
+  background: #0b0b0b;
+  box-shadow: var(--shadow-soft);
+}
+.ba-card img{ width:100%; height:100%; object-fit:cover; filter: grayscale(.1) contrast(1.05); }
+.ba-card-now{ width: 172px; }
+.ba-card-now img{ filter: saturate(.9) sepia(.07) contrast(1.04); }
+.ba-caption{
+  font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color: var(--ink-faint); text-align:center;
+}
+.ba-arrow{
+  align-self:center;
+  font-family:"Fredoka", ui-rounded, sans-serif;
+  font-size:1.6rem; color: var(--olive);
+  margin-top: 42px;
 }
 
 /* ---------- método: la columna ---------- */
@@ -406,12 +439,6 @@ nav.links a:hover{ opacity:1; }
   background: var(--stone-deep);
   border: 1px solid var(--stone-line);
 }
-.benefit.lg{
-  background: var(--olive);
-  color: var(--chalk);
-  border-color: transparent;
-}
-.benefit.lg p{ color: color-mix(in srgb, var(--chalk) 82%, transparent); }
 .benefit h4{ font-size: 1.05rem; margin-bottom:8px; }
 .benefit p{ color: var(--ink-soft); font-size:.95rem; }
 
@@ -457,8 +484,9 @@ nav.links a:hover{ opacity:1; }
   border: 1px solid var(--stone-line);
 }
 .testi p.quote{
-  font-family:"Yellowtail", cursive;
-  font-size:1.5rem; line-height:1.2; color:var(--wine);
+  font-family:"Fredoka", ui-rounded, "Karla", sans-serif;
+  font-weight: 600;
+  font-size:1.15rem; line-height:1.35; color:var(--wine);
   margin-bottom:16px;
 }
 .testi .who{ font-size:.85rem; color:var(--ink-faint); font-weight:700; }
