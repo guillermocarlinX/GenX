@@ -248,6 +248,16 @@ nav.links a:hover{ opacity:.7; }
 .testi{ background: var(--white); border-radius: var(--radius-m); padding: 24px; border: 1.5px solid var(--gray-200); }
 .testi p.quote{ font-weight:600; font-size:1.05rem; line-height:1.4; margin-bottom:14px; }
 .testi .who{ font-size:.85rem; color: var(--gray-500); }
+.testi-placeholder{ border-style:dashed; }
+.testi-placeholder .quote{ color:var(--gray-500); font-style:italic; font-weight:500; }
+
+/* ---------- language toggle ---------- */
+.lang-toggle{ display:flex; align-items:center; gap:2px; border:1.5px solid var(--gray-200); border-radius: var(--radius-pill); padding:3px; }
+.nav-row.on-photo .lang-toggle{ border-color: rgba(255,255,255,.55); }
+.lang-toggle button{ border:none; background:transparent; padding:.4em .85em; border-radius: var(--radius-pill); cursor:pointer; color:inherit; font:inherit; font-size:.72rem; font-weight:700; letter-spacing:.02em; opacity:.55; }
+.lang-toggle button:hover{ opacity:.85; }
+.lang-toggle button[aria-pressed="true"]{ opacity:1; background:var(--ink); color:var(--white); }
+.nav-row.on-photo .lang-toggle button[aria-pressed="true"]{ background:#fff; color:var(--ink); }
 
 /* ---------- app teaser: foto card oscura ---------- */
 .dark-block{ position:relative; isolation:isolate; overflow:hidden; border-radius: var(--radius-l); background:var(--ink); color:var(--white); padding:48px 36px; }
