@@ -5,7 +5,7 @@ import { ok, fail, requireUser, postgrest } from './_shared.js';
 export default async function handler(req, res) {
     if (req.method !== 'GET') return fail(res, 'VALIDATION_FAILED', 'GET only');
 
-    const auth = requireUser(req);
+    const auth = await requireUser(req);
     if (!auth) return fail(res, 'UNAUTHENTICATED', 'missing or invalid token');
 
     const resp = await postgrest(`/genx_subscriptions?user_id=eq.${auth.userId}&select=*`, { token: auth.token });

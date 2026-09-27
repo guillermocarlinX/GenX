@@ -8,7 +8,7 @@ import { ok, fail, requireUser, postgrest, readJson, isUuid } from './_shared.js
 const CLIENTS = ['web', 'ios', 'android'];
 
 export default async function handler(req, res) {
-    const auth = requireUser(req);
+    const auth = await requireUser(req);
     if (!auth) return fail(res, 'UNAUTHENTICATED', 'missing or invalid token');
 
     if (req.method === 'GET') {

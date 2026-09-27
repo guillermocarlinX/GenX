@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     if (req.method !== 'PATCH') return fail(res, 'VALIDATION_FAILED', 'PATCH only');
 
     // 1. no or unverifiable bearer token
-    const auth = requireUser(req);
+    const auth = await requireUser(req);
     if (!auth) return fail(res, 'UNAUTHENTICATED', 'missing or invalid token');
 
     // 2. sessionId not a UUID

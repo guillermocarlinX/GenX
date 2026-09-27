@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return fail(res, 'VALIDATION_FAILED', 'POST only');
 
     // 1. no or unverifiable bearer token
-    const auth = requireUser(req);
+    const auth = await requireUser(req);
     if (!auth) return fail(res, 'UNAUTHENTICATED', 'missing or invalid token');
 
     // 2. workoutId not a UUID, or client missing or not in the enum

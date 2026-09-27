@@ -9,7 +9,7 @@ import { ok, fail, requireUser, postgrest, isUuid } from '../_shared.js';
 export default async function handler(req, res) {
     if (req.method !== 'GET') return fail(res, 'VALIDATION_FAILED', 'GET only');
 
-    const auth = requireUser(req);
+    const auth = await requireUser(req);
     if (!auth) return fail(res, 'UNAUTHENTICATED', 'missing or invalid token');
 
     const { workoutId } = req.query;

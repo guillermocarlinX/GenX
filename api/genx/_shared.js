@@ -4,14 +4,17 @@
 // route, so this is a module, not an endpoint.
 //
 // Auth model: the caller sends `Authorization: Bearer <supabase access token>`.
-// It is verified locally as HS256 against GENX_SUPABASE_JWT_SECRET — no network
-// call to Supabase Auth on every request. The verified token is then forwarded
-// as-is to PostgREST for every user-scoped read/write, so Postgres RLS is the
-// actual enforcement, never this file's own logic. The service-role key is
-// used only for the handful of paths that need it (webhook writes, minting a
-// signed video URL) — see each endpoint for which.
-
-import crypto from 'node:crypto';
+// It is verified with one call to Supabase Auth's own GET /auth/v1/user —
+// deliberately NOT a local HS256 check against a shared secret, because this
+// project's JWT signing keys have already been rotated to an asymmetric key
+// (ECC P-256); new access tokens are signed with that key, not HS256, so a
+// local shared-secret check would reject every real session. Letting
+// Supabase's own server verify the signature means it never matters which
+// key or algorithm actually signed a given token. The verified token is then
+// forwarded as-is to PostgREST for every user-scoped read/write, so Postgres
+// RLS is the actual enforcement, never this file's own logic. The
+// service-role key is used only for the handful of paths that need it
+// (webhook writes, minting a signed video URL) — see each endpoint for which.
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -52,54 +55,54 @@ export function fail(res, code, message) {
 }
 
 // ---------------------------------------------------------------------------
-// Auth — local HS256 verification, no dependency
+// Auth — verified by Supabase Auth itself, over the network
 // ---------------------------------------------------------------------------
 
-function base64UrlDecode(input) {
-    return Buffer.from(input.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
-}
+// A tiny in-memory cache so a burst of requests from the same session in the
+// same warm Lambda instance doesn't re-verify the same token every time.
+// Bounded by the token's own expiry — never longer than that.
+const verifiedTokenCache = new Map();
 
-// Verifies a Supabase access token's signature and expiry against
-// GENX_SUPABASE_JWT_SECRET. Returns the decoded payload (carries `sub`, the
-// user id) or null if the token is missing, malformed, expired, or the
-// signature does not match. Never throws.
-export function verifyToken(bearerHeader) {
+// Verifies a Supabase access token by asking Supabase Auth's own
+// GET /auth/v1/user. Returns { id, email } for a valid, non-expired token, or
+// null for anything else (missing header, expired, revoked, malformed).
+// Never throws.
+export async function verifyToken(bearerHeader) {
     if (!bearerHeader || !bearerHeader.startsWith('Bearer ')) return null;
     const token = bearerHeader.slice(7).trim();
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const [headerB64, payloadB64, sigB64] = parts;
+    if (!token) return null;
 
-    let payload;
+    const cached = verifiedTokenCache.get(token);
+    if (cached && cached.expiresAt > Date.now()) return cached.user;
+
     try {
-        payload = JSON.parse(base64UrlDecode(payloadB64).toString('utf8'));
+        const resp = await fetch(`${supabaseUrl()}/auth/v1/user`, {
+            headers: {
+                apikey: env('GENX_SUPABASE_ANON_KEY'),
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!resp.ok) return null;
+        const user = await resp.json();
+        if (!user?.id) return null;
+
+        verifiedTokenCache.set(token, { user, expiresAt: Date.now() + 60_000 });
+        if (verifiedTokenCache.size > 500) {
+            const oldestKey = verifiedTokenCache.keys().next().value;
+            verifiedTokenCache.delete(oldestKey);
+        }
+        return user;
     } catch {
         return null;
     }
-
-    const secret = env('GENX_SUPABASE_JWT_SECRET');
-    const expectedSig = crypto
-        .createHmac('sha256', secret)
-        .update(`${headerB64}.${payloadB64}`)
-        .digest();
-    const actualSig = base64UrlDecode(sigB64);
-    if (expectedSig.length !== actualSig.length || !crypto.timingSafeEqual(expectedSig, actualSig)) {
-        return null;
-    }
-
-    if (payload.aud !== 'authenticated') return null;
-    if (typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) return null;
-    if (!payload.sub) return null;
-
-    return payload; // payload.sub is the user id
 }
 
 // Reads and verifies the caller's token from the request. Returns the user id
-// (`sub`) and the raw token (to forward to PostgREST so RLS applies), or null.
-export function requireUser(req) {
-    const payload = verifyToken(req.headers.authorization);
-    if (!payload) return null;
-    return { userId: payload.sub, token: req.headers.authorization.slice(7).trim() };
+// and the raw token (to forward to PostgREST so RLS applies), or null.
+export async function requireUser(req) {
+    const user = await verifyToken(req.headers.authorization);
+    if (!user) return null;
+    return { userId: user.id, token: req.headers.authorization.slice(7).trim() };
 }
 
 // ---------------------------------------------------------------------------
