@@ -6,7 +6,7 @@ import { ok, fail, postgrest, env } from './_shared.js';
 export default async function handler(req, res) {
     if (req.method !== 'GET') return fail(res, 'VALIDATION_FAILED', 'GET only');
 
-    const configured = ['GENX_SUPABASE_URL', 'GENX_SUPABASE_ANON_KEY', 'GENX_SUPABASE_JWT_SECRET']
+    const configured = ['GENX_SUPABASE_URL', 'GENX_SUPABASE_ANON_KEY', 'GENX_SUPABASE_SERVICE_ROLE_KEY']
         .every((name) => !!process.env[name]);
 
     if (req.query.deep !== '1') {
