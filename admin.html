@@ -244,7 +244,12 @@ function showFatal(detail) {
 window.addEventListener('error', (e) => { showFatal(String(e.error || e.message)); });
 function setMsg(elId, text, kind) {
     const el = document.getElementById(elId);
-    el.innerHTML = text ? '<div class="msg ' + kind + '">' + text + '</div>' : '';
+    el.innerHTML = '';
+    if (!text) return;
+    const div = document.createElement('div');
+    div.className = 'msg ' + kind;
+    div.textContent = text;
+    el.appendChild(div);
 }
 
 async function init() {
@@ -307,12 +312,44 @@ function renderLevels() {
         const url = publicImageUrl(l.cover_image_path);
         const row = document.createElement('div');
         row.className = 'level-row';
-        row.innerHTML =
-            (url ? '<img src="' + url + '">' : '<div class="ph">🖼</div>') +
-            '<div class="row-info"><div class="t">' + l.title + '</div>' +
-            '<div class="d">/' + l.slug + ' · orden ' + l.sort_order + ' · ' + l.required_entitlement + '</div></div>' +
-            '<span class="badge ' + (l.is_published ? 'pub' : 'unpub') + '">' + (l.is_published ? 'Publicado' : 'Oculto') + '</span>' +
-            '<div class="row-actions"><button class="small secondary" onclick="openLevelEditor(\'' + l.id + '\')">Editar</button></div>';
+
+        if (url) {
+            const img = document.createElement('img');
+            img.src = url;
+            row.appendChild(img);
+        } else {
+            const ph = document.createElement('div');
+            ph.className = 'ph';
+            ph.textContent = '🖼';
+            row.appendChild(ph);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'row-info';
+        const t = document.createElement('div');
+        t.className = 't';
+        t.textContent = l.title;
+        const d = document.createElement('div');
+        d.className = 'd';
+        d.textContent = '/' + l.slug + ' · orden ' + l.sort_order + ' · ' + l.required_entitlement;
+        info.appendChild(t);
+        info.appendChild(d);
+        row.appendChild(info);
+
+        const badge = document.createElement('span');
+        badge.className = 'badge ' + (l.is_published ? 'pub' : 'unpub');
+        badge.textContent = l.is_published ? 'Publicado' : 'Oculto';
+        row.appendChild(badge);
+
+        const actions = document.createElement('div');
+        actions.className = 'row-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'small secondary';
+        editBtn.textContent = 'Editar';
+        editBtn.addEventListener('click', () => openLevelEditor(l.id));
+        actions.appendChild(editBtn);
+        row.appendChild(actions);
+
         el.appendChild(row);
     });
 }
@@ -439,13 +476,44 @@ function renderWorkouts() {
         const hasVideo = w.genx_videos && w.genx_videos.length > 0;
         const row = document.createElement('div');
         row.className = 'workout-row';
-        row.innerHTML =
-            (url ? '<img src="' + url + '">' : '<div class="ph">🖼</div>') +
-            '<div class="row-info"><div class="t">' + w.title + '</div>' +
-            '<div class="d">orden ' + w.sort_order + ' · ' + w.duration_minutes + ' min · ' +
-            (hasVideo ? 'video cargado' : 'sin video') + '</div></div>' +
-            '<span class="badge ' + (w.is_published ? 'pub' : 'unpub') + '">' + (w.is_published ? 'Publicado' : 'Oculto') + '</span>' +
-            '<div class="row-actions"><button class="small secondary" onclick="openWorkoutEditor(\'' + w.id + '\')">Editar</button></div>';
+
+        if (url) {
+            const img = document.createElement('img');
+            img.src = url;
+            row.appendChild(img);
+        } else {
+            const ph = document.createElement('div');
+            ph.className = 'ph';
+            ph.textContent = '🖼';
+            row.appendChild(ph);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'row-info';
+        const t = document.createElement('div');
+        t.className = 't';
+        t.textContent = w.title;
+        const d = document.createElement('div');
+        d.className = 'd';
+        d.textContent = 'orden ' + w.sort_order + ' · ' + w.duration_minutes + ' min · ' + (hasVideo ? 'video cargado' : 'sin video');
+        info.appendChild(t);
+        info.appendChild(d);
+        row.appendChild(info);
+
+        const badge = document.createElement('span');
+        badge.className = 'badge ' + (w.is_published ? 'pub' : 'unpub');
+        badge.textContent = w.is_published ? 'Publicado' : 'Oculto';
+        row.appendChild(badge);
+
+        const actions = document.createElement('div');
+        actions.className = 'row-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'small secondary';
+        editBtn.textContent = 'Editar';
+        editBtn.addEventListener('click', () => openWorkoutEditor(w.id));
+        actions.appendChild(editBtn);
+        row.appendChild(actions);
+
         el.appendChild(row);
     });
 }
