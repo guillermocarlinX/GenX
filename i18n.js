@@ -256,7 +256,7 @@
 
       "historia.eyebrow": "My story",
       "historia.pull": "This isn't about becoming someone new. It's about recognizing yourself again.",
-      "historia.p1": "After two spinal surgeries — one with a six-screw fixation at L4–L5–S1 — I had to learn to relate to my body all over again. In kettlebells, I found not just strength, but stability, coordination, and confidence. From that experience, my professional training, and more than six years of coaching students, the GENX Method was born.",
+      "historia.p1": "After two spinal surgeries, one with a six-screw fixation at L4–L5–S1, I had to learn to relate to my body all over again. In kettlebells, I found not just strength, but stability, coordination, and confidence. From that experience, my professional training, and more than six years of coaching students, the GENX Method was born.",
       "historia.toggle": "Read the full story",
       "historia.bio1": "I'm Karla Dellepiane, a movement coach specializing in kettlebells, functional training, applied movement neuroscience and sports nutrition.",
       "historia.bio2": "My path as a trainer didn't start only with a desire to exercise. It started with my own need to rebuild trust in my body. After going through two spinal surgeries, I was left with effects on my left side: my foot felt stiff and numb, and I struggled to connect with and stabilize that leg and hip. My body had changed, and I needed to learn to relate to it in a different way.",
