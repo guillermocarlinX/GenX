@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENX Trainer — Panel de contenido</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"
+        integrity="sha256-3/HlRfTzW9Qolc1vRkMeVhN90TAx5GqXWcRGRHwRpWc=" crossorigin="anonymous"></script>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        background:#f5f5f5; color:#141313; padding:20px;
+    }
+    .wrap { max-width:900px; margin:0 auto; }
+    header.top {
+        background:#4A1522; color:#fff; padding:20px 24px; border-radius:12px 12px 0 0;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    header.top h1 { font-size:20px; font-weight:800; letter-spacing:-0.02em; }
+    header.top .sub { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; opacity:.75; margin-top:2px; }
+    header.top button { width:auto; padding:8px 16px; font-size:13px; }
+    .panel { background:#fff; border-radius:0 0 12px 12px; box-shadow:0 4px 12px rgba(0,0,0,.08); padding:24px; margin-bottom:24px; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.08); padding:24px; margin-bottom:24px; }
+
+    h2 { font-size:19px; font-weight:800; letter-spacing:-0.01em; margin-bottom:16px; }
+    h3 { font-size:15px; font-weight:700; margin-bottom:10px; }
+    label { display:block; margin-bottom:6px; font-weight:600; color:#333; font-size:13px; }
+    .field { margin-bottom:16px; }
+    input[type=text], input[type=number], input[type=email], input[type=password], textarea, select {
+        width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit;
+    }
+    textarea { resize:vertical; min-height:60px; }
+    input:focus, textarea:focus, select:focus { outline:none; border-color:#7A2338; box-shadow:0 0 0 3px rgba(122,35,56,.12); }
+    .checkline { display:flex; align-items:center; gap:8px; }
+    .checkline input { width:auto; }
+    .checkline label { margin:0; font-weight:500; }
+
+    button { width:100%; padding:11px; background:#7A2338; color:#fff; border:none; border-radius:8px;
+        font-size:14px; font-weight:700; cursor:pointer; transition:transform .1s; margin-bottom:8px; }
+    button:hover { transform:translateY(-1px); }
+    button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    button.secondary { background:#e8e8e8; color:#333; }
+    button.danger { background:#8a2020; }
+    button.small { width:auto; padding:6px 12px; font-size:12px; margin:0; }
+    .row-actions { display:flex; gap:8px; }
+
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .level-row, .workout-row {
+        display:flex; align-items:center; gap:14px; padding:12px; border:1px solid #eee; border-radius:10px; margin-bottom:10px;
+    }
+    .level-row img, .workout-row img { width:56px; height:56px; object-fit:cover; border-radius:8px; background:#f0f0f0; flex-shrink:0; }
+    .level-row .ph, .workout-row .ph {
+        width:56px; height:56px; border-radius:8px; background:#f0f0f0; flex-shrink:0;
+        display:flex; align-items:center; justify-content:center; color:#bbb; font-size:20px;
+    }
+    .row-info { flex:1; min-width:0; }
+    .row-info .t { font-weight:700; font-size:14px; }
+    .row-info .d { font-size:12px; color:#777; margin-top:2px; }
+    .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+    .badge.pub { background:#e5f3e5; color:#2f6b2f; }
+    .badge.unpub { background:#f2e5e5; color:#8a3030; }
+
+    .imgpick { display:flex; align-items:center; gap:12px; }
+    .imgpick .preview { width:72px; height:72px; border-radius:8px; object-fit:cover; background:#f0f0f0; flex-shrink:0; }
+    .imgpick input[type=file] { font-size:12px; }
+
+    .msg { padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:16px; }
+    .msg.err { background:#fbe9e9; color:#8a2020; }
+    .msg.ok { background:#e9f7e9; color:#2f6b2f; }
+    .hint { font-size:12px; color:#999; margin-top:-8px; margin-bottom:16px; }
+    [hidden] { display:none !important; }
+    .progress { height:6px; background:#eee; border-radius:4px; overflow:hidden; margin-top:6px; }
+    .progress i { display:block; height:100%; width:0%; background:#7A2338; transition:width .2s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- NOT CONFIGURED -->
+  <div id="screen-config" class="card" hidden>
+    <h2>Panel sin configurar</h2>
+    <p style="color:#666; font-size:14px; line-height:1.6;">
+      Este panel todavía no tiene las credenciales del proyecto Supabase de GENX (<code>SUPABASE_URL</code> /
+      <code>SUPABASE_ANON_KEY</code> al inicio de este archivo). Complétalas una vez que la conexión al
+      proyecto esté lista.
+    </p>
+  </div>
+
+  <!-- FATAL ERROR (e.g. the Supabase script failed to load) -->
+  <div id="screen-fatal" class="card" hidden>
+    <h2>No se pudo cargar el panel</h2>
+    <p style="color:#666; font-size:14px; line-height:1.6; margin-bottom:12px;">
+      Algo falló antes de poder mostrar la pantalla de ingreso. Esto pasa a veces al abrir el archivo
+      con doble clic (protocolo <code>file://</code>) en vez de una URL real — probá abrirlo desde
+      <code>genx-trainer.com/admin.html</code> en vez del archivo local.
+    </p>
+    <p id="fatal-detail" style="color:#8a2020; font-size:12px; font-family:monospace; background:#fbe9e9; padding:10px; border-radius:8px;"></p>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="screen-login" class="card" hidden>
+    <h2>Ingresar</h2>
+    <div id="login-msg"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="karla@genx-trainer.com">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button onclick="doLogin()">Ingresar</button>
+  </div>
+
+  <!-- NOT AUTHORIZED -->
+  <div id="screen-forbidden" class="card" hidden>
+    <h2>Cuenta sin permiso</h2>
+    <p style="color:#666; font-size:14px; margin-bottom:16px;">
+      Esta cuenta inició sesión correctamente pero no está en la lista de administradores de contenido
+      (<code>genx_admins</code>). Pide que agreguen tu usuario ahí.
+    </p>
+    <button class="secondary" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="screen-app" hidden>
+    <header class="top">
+      <div>
+        <h1>GENX Trainer</h1>
+        <div class="sub">Panel de contenido</div>
+      </div>
+      <button onclick="doLogout()">Cerrar sesión</button>
+    </header>
+    <div class="panel">
+
+      <!-- LEVELS LIST -->
+      <div id="view-levels">
+        <h2>Niveles</h2>
+        <div id="msg-levels"></div>
+        <div id="levels-list"></div>
+        <button onclick="openLevelEditor(null)">+ Nuevo nivel</button>
+      </div>
+
+      <!-- LEVEL EDITOR -->
+      <div id="view-level-editor" hidden>
+        <button class="secondary small" onclick="closeLevelEditor()">← Volver a niveles</button>
+        <h2 id="level-editor-title" style="margin-top:16px;">Nuevo nivel</h2>
+        <div id="msg-level-editor"></div>
+
+        <div class="field">
+          <label>Foto de portada</label>
+          <div class="imgpick">
+            <img id="level-cover-preview" class="preview" src="" hidden>
+            <div id="level-cover-ph" class="ph" style="width:72px;height:72px;">🖼</div>
+            <input type="file" id="level-cover-file" accept="image/*" onchange="previewImage(this,'level-cover-preview','level-cover-ph')">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Título</label><input type="text" id="level-title" placeholder="Foundation"></div>
+          <div class="field"><label>Slug</label><input type="text" id="level-slug" placeholder="foundation"></div>
+        </div>
+        <div class="field"><label>Resumen</label><textarea id="level-summary" placeholder="Domina la técnica básica de kettlebell..."></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Orden</label><input type="number" id="level-sort" min="1" value="1"></div>
+          <div class="field">
+            <label>Entitlement requerido</label>
+            <select id="level-entitlement">
+              <option value="free">free</option>
+              <option value="pro" selected>pro</option>
+              <option value="platinum">platinum</option>
+            </select>
+          </div>
+        </div>
+        <div class="field checkline"><input type="checkbox" id="level-published" checked><label for="level-published">Publicado (visible en la app)</label></div>
+        <button onclick="saveLevel()" id="btn-save-level">Guardar nivel</button>
+
+        <div id="level-workouts-section" hidden>
+          <h3 style="margin-top:28px;">Workouts de este nivel</h3>
+          <div id="workouts-list"></div>
+          <button class="secondary" onclick="openWorkoutEditor(null)">+ Nuevo workout</button>
+        </div>
+      </div>
+
+      <!-- WORKOUT EDITOR -->
+      <div id="view-workout-editor" hidden>
+        <button class="secondary small" onclick="closeWorkoutEditor()">← Volver al nivel</button>
+        <h2 id="workout-editor-title" style="margin-top:16px;">Nuevo workout</h2>
+        <div id="msg-workout-editor"></div>
+
+        <div class="field">
+          <label>Foto de portada</label>
+          <div class="imgpick">
+            <img id="workout-cover-preview" class="preview" src="" hidden>
+            <div id="workout-cover-ph" class="ph" style="width:72px;height:72px;">🖼</div>
+            <input type="file" id="workout-cover-file" accept="image/*" onchange="previewImage(this,'workout-cover-preview','workout-cover-ph')">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Título</label><input type="text" id="workout-title" placeholder="The Swing"></div>
+          <div class="field"><label>Slug</label><input type="text" id="workout-slug" placeholder="the-swing"></div>
+        </div>
+        <div class="field"><label>Resumen</label><textarea id="workout-summary" placeholder="Domina el swing fundamental de kettlebell"></textarea></div>
+        <div class="grid2">
+          <div class="field"><label>Orden dentro del nivel (1-4)</label><input type="number" id="workout-sort" min="1" max="4" value="1"></div>
+          <div class="field"><label>Duración (minutos)</label><input type="number" id="workout-duration" min="1"></div>
+        </div>
+        <div class="field"><label>Equipo</label><input type="text" id="workout-equipment" placeholder="1 kettlebell"></div>
+        <div class="field checkline"><input type="checkbox" id="workout-published" checked><label for="workout-published">Publicado (visible en la app)</label></div>
+
+        <div class="field">
+          <label>Video del workout</label>
+          <div id="workout-video-current" class="hint" hidden></div>
+          <input type="file" id="workout-video-file" accept="video/*" onchange="onVideoPicked(this)">
+          <div class="hint" id="workout-video-hint">Sube un MP4. La duración se detecta sola del archivo.</div>
+          <div class="progress" id="video-progress" hidden><i id="video-progress-bar"></i></div>
+        </div>
+
+        <button onclick="saveWorkout()" id="btn-save-workout">Guardar workout</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SUPABASE_URL = 'https://yzyfxsfrwtxwaalfblnb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6eWZ4c2Zyd3R4d2FhbGZibG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Njk1NjksImV4cCI6MjEwNTE0NTU2OX0.hCAbipLqq6mZoFkdw6e8NagazDjNB7b1KGROPkFskAo';
+const IMAGES_BUCKET = 'genx-images';
+const VIDEOS_BUCKET = 'genx-videos';
+
+let sb = null;
+let state = { levels: [], currentLevel: null, currentWorkouts: [], currentWorkout: null,
+              levelCoverFile: null, workoutCoverFile: null, workoutVideoFile: null, workoutVideoDuration: null };
+
+function show(id) {
+    ['screen-config','screen-fatal','screen-login','screen-forbidden','screen-app'].forEach(s => document.getElementById(s).hidden = (s !== id));
+}
+function showFatal(detail) {
+    document.getElementById('fatal-detail').textContent = detail;
+    show('screen-fatal');
+}
+window.addEventListener('error', (e) => { showFatal(String(e.error || e.message)); });
+function setMsg(elId, text, kind) {
+    const el = document.getElementById(elId);
+    el.innerHTML = text ? '<div class="msg ' + kind + '">' + text + '</div>' : '';
+}
+
+async function init() {
+    try {
+        if (SUPABASE_URL.startsWith('REPLACE_') || SUPABASE_ANON_KEY.startsWith('REPLACE_')) {
+            show('screen-config');
+            return;
+        }
+        if (typeof supabase === 'undefined') {
+            showFatal('El script de Supabase (cdn.jsdelivr.net) no cargó. Revisa tu conexión o si un bloqueador de anuncios/extensión lo está frenando.');
+            return;
+        }
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) { await afterLogin(); } else { show('screen-login'); }
+    } catch (e) {
+        showFatal(String(e && e.message ? e.message : e));
+    }
+}
+
+async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) { setMsg('login-msg', 'Completa email y contraseña.', 'err'); return; }
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { setMsg('login-msg', error.message, 'err'); return; }
+    await afterLogin();
+}
+
+async function doLogout() {
+    await sb.auth.signOut();
+    show('screen-login');
+}
+
+async function afterLogin() {
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: adminRow, error } = await sb.from('genx_admins').select('user_id').eq('user_id', user.id).maybeSingle();
+    if (error || !adminRow) { show('screen-forbidden'); return; }
+    show('screen-app');
+    await loadLevels();
+}
+
+// ===== LEVELS =====
+async function loadLevels() {
+    const { data, error } = await sb.from('genx_levels').select('*').order('sort_order');
+    if (error) { setMsg('msg-levels', 'Error cargando niveles: ' + error.message, 'err'); return; }
+    state.levels = data || [];
+    renderLevels();
+}
+
+function publicImageUrl(path) {
+    if (!path) return null;
+    return sb.storage.from(IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+function renderLevels() {
+    const el = document.getElementById('levels-list');
+    el.innerHTML = '';
+    state.levels.forEach(l => {
+        const url = publicImageUrl(l.cover_image_path);
+        const row = document.createElement('div');
+        row.className = 'level-row';
+        row.innerHTML =
+            (url ? '<img src="' + url + '">' : '<div class="ph">🖼</div>') +
+            '<div class="row-info"><div class="t">' + l.title + '</div>' +
+            '<div class="d">/' + l.slug + ' · orden ' + l.sort_order + ' · ' + l.required_entitlement + '</div></div>' +
+            '<span class="badge ' + (l.is_published ? 'pub' : 'unpub') + '">' + (l.is_published ? 'Publicado' : 'Oculto') + '</span>' +
+            '<div class="row-actions"><button class="small secondary" onclick="openLevelEditor(\'' + l.id + '\')">Editar</button></div>';
+        el.appendChild(row);
+    });
+}
+
+function openLevelEditor(levelId) {
+    state.currentLevel = levelId ? state.levels.find(l => l.id === levelId) : null;
+    state.levelCoverFile = null;
+    document.getElementById('view-levels').hidden = true;
+    document.getElementById('view-level-editor').hidden = false;
+    setMsg('msg-level-editor', '', '');
+
+    const l = state.currentLevel;
+    document.getElementById('level-editor-title').textContent = l ? 'Editar nivel' : 'Nuevo nivel';
+    document.getElementById('level-title').value = l ? l.title : '';
+    document.getElementById('level-slug').value = l ? l.slug : '';
+    document.getElementById('level-summary').value = l ? l.summary : '';
+    document.getElementById('level-sort').value = l ? l.sort_order : (state.levels.length + 1);
+    document.getElementById('level-entitlement').value = l ? l.required_entitlement : 'pro';
+    document.getElementById('level-published').checked = l ? l.is_published : true;
+
+    const preview = document.getElementById('level-cover-preview');
+    const ph = document.getElementById('level-cover-ph');
+    const url = l ? publicImageUrl(l.cover_image_path) : null;
+    if (url) { preview.src = url; preview.hidden = false; ph.hidden = true; }
+    else { preview.hidden = true; ph.hidden = false; }
+    document.getElementById('level-cover-file').value = '';
+
+    document.getElementById('level-workouts-section').hidden = !l;
+    if (l) loadWorkouts(l.id); else state.currentWorkouts = [];
+}
+
+function closeLevelEditor() {
+    document.getElementById('view-level-editor').hidden = true;
+    document.getElementById('view-levels').hidden = false;
+    loadLevels();
+}
+
+function previewImage(input, previewId, phId) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    document.getElementById(previewId).src = url;
+    document.getElementById(previewId).hidden = false;
+    document.getElementById(phId).hidden = true;
+}
+
+function slugify(text) {
+    return text.toString().toLowerCase().trim()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+async function uploadImageIfNeeded(file, pathPrefix) {
+    if (!file) return null;
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = pathPrefix + '/cover-' + Date.now() + '.' + ext;
+    const { error } = await sb.storage.from(IMAGES_BUCKET).upload(path, file, { upsert: true, contentType: file.type });
+    if (error) throw new Error('Subiendo imagen: ' + error.message);
+    return path;
+}
+
+async function saveLevel() {
+    const btn = document.getElementById('btn-save-level');
+    btn.disabled = true;
+    setMsg('msg-level-editor', '', '');
+    try {
+        const title = document.getElementById('level-title').value.trim();
+        let slug = document.getElementById('level-slug').value.trim();
+        if (!title) throw new Error('El título es obligatorio.');
+        if (!slug) slug = slugify(title);
+
+        const payload = {
+            title, slug,
+            summary: document.getElementById('level-summary').value.trim(),
+            sort_order: parseInt(document.getElementById('level-sort').value, 10) || 1,
+            required_entitlement: document.getElementById('level-entitlement').value,
+            is_published: document.getElementById('level-published').checked,
+        };
+
+        const coverFile = document.getElementById('level-cover-file').files[0];
+        let levelId = state.currentLevel ? state.currentLevel.id : null;
+
+        if (levelId) {
+            const { error } = await sb.from('genx_levels').update(payload).eq('id', levelId);
+            if (error) throw new Error(error.message);
+        } else {
+            const { data, error } = await sb.from('genx_levels').insert(payload).select().single();
+            if (error) throw new Error(error.message);
+            levelId = data.id;
+            state.currentLevel = data;
+        }
+
+        if (coverFile) {
+            const path = await uploadImageIfNeeded(coverFile, 'levels/' + levelId);
+            const { error } = await sb.from('genx_levels').update({ cover_image_path: path }).eq('id', levelId);
+            if (error) throw new Error(error.message);
+        }
+
+        setMsg('msg-level-editor', 'Nivel guardado.', 'ok');
+        await loadLevels();
+        openLevelEditor(levelId);
+    } catch (e) {
+        setMsg('msg-level-editor', e.message, 'err');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ===== WORKOUTS =====
+async function loadWorkouts(levelId) {
+    const { data, error } = await sb.from('genx_workouts')
+        .select('*, genx_videos(id, storage_path, duration_seconds)')
+        .eq('level_id', levelId).order('sort_order');
+    if (error) { setMsg('msg-level-editor', 'Error cargando workouts: ' + error.message, 'err'); return; }
+    state.currentWorkouts = data || [];
+    renderWorkouts();
+}
+
+function renderWorkouts() {
+    const el = document.getElementById('workouts-list');
+    el.innerHTML = '';
+    state.currentWorkouts.forEach(w => {
+        const url = publicImageUrl(w.cover_image_path);
+        const hasVideo = w.genx_videos && w.genx_videos.length > 0;
+        const row = document.createElement('div');
+        row.className = 'workout-row';
+        row.innerHTML =
+            (url ? '<img src="' + url + '">' : '<div class="ph">🖼</div>') +
+            '<div class="row-info"><div class="t">' + w.title + '</div>' +
+            '<div class="d">orden ' + w.sort_order + ' · ' + w.duration_minutes + ' min · ' +
+            (hasVideo ? 'video cargado' : 'sin video') + '</div></div>' +
+            '<span class="badge ' + (w.is_published ? 'pub' : 'unpub') + '">' + (w.is_published ? 'Publicado' : 'Oculto') + '</span>' +
+            '<div class="row-actions"><button class="small secondary" onclick="openWorkoutEditor(\'' + w.id + '\')">Editar</button></div>';
+        el.appendChild(row);
+    });
+}
+
+function openWorkoutEditor(workoutId) {
+    state.currentWorkout = workoutId ? state.currentWorkouts.find(w => w.id === workoutId) : null;
+    state.workoutCoverFile = null; state.workoutVideoFile = null; state.workoutVideoDuration = null;
+    document.getElementById('view-level-editor').hidden = true;
+    document.getElementById('view-workout-editor').hidden = false;
+    setMsg('msg-workout-editor', '', '');
+
+    const w = state.currentWorkout;
+    document.getElementById('workout-editor-title').textContent = w ? 'Editar workout' : 'Nuevo workout';
+    document.getElementById('workout-title').value = w ? w.title : '';
+    document.getElementById('workout-slug').value = w ? w.slug : '';
+    document.getElementById('workout-summary').value = w ? w.summary : '';
+    document.getElementById('workout-sort').value = w ? w.sort_order : (state.currentWorkouts.length + 1);
+    document.getElementById('workout-duration').value = w ? w.duration_minutes : '';
+    document.getElementById('workout-equipment').value = w ? w.equipment : '';
+    document.getElementById('workout-published').checked = w ? w.is_published : true;
+
+    const preview = document.getElementById('workout-cover-preview');
+    const ph = document.getElementById('workout-cover-ph');
+    const url = w ? publicImageUrl(w.cover_image_path) : null;
+    if (url) { preview.src = url; preview.hidden = false; ph.hidden = true; }
+    else { preview.hidden = true; ph.hidden = false; }
+    document.getElementById('workout-cover-file').value = '';
+
+    document.getElementById('workout-video-file').value = '';
+    document.getElementById('video-progress').hidden = true;
+    const currentVideoEl = document.getElementById('workout-video-current');
+    const existingVideo = w && w.genx_videos && w.genx_videos[0];
+    if (existingVideo) {
+        currentVideoEl.textContent = 'Video actual: ' + existingVideo.duration_seconds + 's — subir uno nuevo lo reemplaza.';
+        currentVideoEl.hidden = false;
+    } else {
+        currentVideoEl.hidden = true;
+    }
+}
+
+function closeWorkoutEditor() {
+    document.getElementById('view-workout-editor').hidden = true;
+    document.getElementById('view-level-editor').hidden = false;
+}
+
+function onVideoPicked(input) {
+    const file = input.files[0];
+    if (!file) return;
+    state.workoutVideoFile = file;
+    const url = URL.createObjectURL(file);
+    const probe = document.createElement('video');
+    probe.preload = 'metadata';
+    probe.onloadedmetadata = () => {
+        state.workoutVideoDuration = Math.round(probe.duration);
+        document.getElementById('workout-video-hint').textContent =
+            'Duración detectada: ' + state.workoutVideoDuration + ' segundos.';
+        URL.revokeObjectURL(url);
+    };
+    probe.src = url;
+}
+
+async function saveWorkout() {
+    const btn = document.getElementById('btn-save-workout');
+    btn.disabled = true;
+    setMsg('msg-workout-editor', '', '');
+    try {
+        const levelId = state.currentLevel.id;
+        const title = document.getElementById('workout-title').value.trim();
+        let slug = document.getElementById('workout-slug').value.trim();
+        if (!title) throw new Error('El título es obligatorio.');
+        if (!slug) slug = slugify(title);
+        const duration = parseInt(document.getElementById('workout-duration').value, 10);
+        if (!duration || duration <= 0) throw new Error('La duración en minutos debe ser mayor a 0.');
+
+        const payload = {
+            level_id: levelId, title, slug,
+            summary: document.getElementById('workout-summary').value.trim(),
+            sort_order: parseInt(document.getElementById('workout-sort').value, 10) || 1,
+            duration_minutes: duration,
+            equipment: document.getElementById('workout-equipment').value.trim(),
+            is_published: document.getElementById('workout-published').checked,
+        };
+
+        let workoutId = state.currentWorkout ? state.currentWorkout.id : null;
+        if (workoutId) {
+            const { error } = await sb.from('genx_workouts').update(payload).eq('id', workoutId);
+            if (error) throw new Error(error.message);
+        } else {
+            const { data, error } = await sb.from('genx_workouts').insert(payload).select().single();
+            if (error) throw new Error(error.message);
+            workoutId = data.id;
+        }
+
+        const coverFile = document.getElementById('workout-cover-file').files[0];
+        if (coverFile) {
+            const path = await uploadImageIfNeeded(coverFile, 'workouts/' + workoutId);
+            const { error } = await sb.from('genx_workouts').update({ cover_image_path: path }).eq('id', workoutId);
+            if (error) throw new Error(error.message);
+        }
+
+        if (state.workoutVideoFile) {
+            if (!state.workoutVideoDuration) throw new Error('Espera a que se detecte la duración del video antes de guardar.');
+            document.getElementById('video-progress').hidden = false;
+            const ext = (state.workoutVideoFile.name.split('.').pop() || 'mp4').toLowerCase();
+            const path = 'workouts/' + workoutId + '/video-' + Date.now() + '.' + ext;
+            const { error: upErr } = await sb.storage.from(VIDEOS_BUCKET).upload(path, state.workoutVideoFile, {
+                upsert: true, contentType: state.workoutVideoFile.type });
+            if (upErr) throw new Error('Subiendo video: ' + upErr.message);
+            document.getElementById('video-progress-bar').style.width = '100%';
+
+            const existingVideo = state.currentWorkout && state.currentWorkout.genx_videos && state.currentWorkout.genx_videos[0];
+            if (existingVideo) {
+                const { error } = await sb.from('genx_videos')
+                    .update({ storage_path: path, duration_seconds: state.workoutVideoDuration })
+                    .eq('id', existingVideo.id);
+                if (error) throw new Error(error.message);
+            } else {
+                const { error } = await sb.from('genx_videos').insert({
+                    workout_id: workoutId, storage_path: path,
+                    duration_seconds: state.workoutVideoDuration, sort_order: 1 });
+                if (error) throw new Error(error.message);
+            }
+        }
+
+        setMsg('msg-workout-editor', 'Workout guardado.', 'ok');
+        await loadWorkouts(levelId);
+        closeWorkoutEditor();
+    } catch (e) {
+        setMsg('msg-workout-editor', e.message, 'err');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+init();
+</script>
+</body>
+</html>
